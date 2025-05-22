@@ -13,14 +13,16 @@ type Simple struct {
     Url         string
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
-    simple := Simple{"DJeniUp", "World", r.Host}
+func SimpleFactory(host string) Simple {
+    return Simple{"Hello", "World", host}
+}
 
+func handler(w http.ResponseWriter, r *http.Request) {
+    simple := SimpleFactory(r.Host)
 
     jsonOutput, _ := json.Marshal(simple)
 
     w.Header().Set("Content-Type", "application/json")
-
     fmt.Fprintln(w, string(jsonOutput))
 }
 
