@@ -4,7 +4,6 @@ pipeline {
     tools {
        go "1.24.1"
     }
-    
 
     stages {
         stage('Test') {
@@ -19,7 +18,7 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                sshagent(credentials: ['a70b9b57-bb3e-4270-86a9-6feca6fb8da7']) {
+                sshagent(credentials: ['jenkins-key']) {
                     sh '''
                         mkdir -p ~/.ssh
                         ssh-keyscan -H target >> ~/.ssh/known_hosts
@@ -28,6 +27,5 @@ pipeline {
                 }
             }
         }
-
     }
 }
