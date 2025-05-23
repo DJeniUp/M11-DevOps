@@ -19,11 +19,15 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                sshagent(credentials: ['jenkins-key']) {
-                    sh '''
+                withCredentials([sshUserPrivateKey(credentialsId: 'target-ssh-key',
+                                                   keyFileVariable: 'ssh_key',
+                                                   usernameVariable: 'ssh_user')]) {
+                    sh """
+
+                        chmod +x main
+                        
                         mkdir -p ~/.ssh
-                        ssh-keyscan -H target >> ~/.ssh/known_hosts
-                        scp main laborant@target:~
+                        ssh-keyscan target >> ~/.ssh/known_hosts
                     '''
                 }
             }
