@@ -14,7 +14,7 @@ pipeline {
         }
         stage('Build') {
             steps {
-                sh "go build main.go"
+                sh 'go build -o main main.go'
             }
         }
         stage('Deploy') {
