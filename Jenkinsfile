@@ -20,7 +20,7 @@ pipeline {
         
         stage('Deploy') {
             steps {
-                withCredentials([sshUserPrivateKey(credentialsId: 'jenkins-key',
+                withCredentials([sshUserPrivateKey(credentialsId: 'key-jenkins',
                                                    keyFileVariable: 'ssh_key',
                                                    usernameVariable: 'ssh_user')]) {
                     sh """
