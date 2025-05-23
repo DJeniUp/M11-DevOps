@@ -17,21 +17,7 @@ pipeline {
                 sh 'go build -o main main.go'
             }
         }
-        stage('Deploy') {
-            steps {
-                withCredentials([sshUserPrivateKey(credentialsId: 'target-ssh-key',
-                                                   keyFileVariable: 'ssh_key',
-                                                   usernameVariable: 'ssh_user')]) {
-                    sh """
-
-                        chmod +x main
-                        
-                        mkdir -p ~/.ssh
-                        ssh-keyscan target >> ~/.ssh/known_hosts
-                    '''
-                }
-            }
-        }
+        
 
     }
 }
