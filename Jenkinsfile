@@ -19,7 +19,7 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                sshagent(credentials: ['jenkins-key']) {
+                sshagent(credentials: ['a70b9b57-bb3e-4270-86a9-6feca6fb8da7']) {
                     sh '''
                         mkdir -p ~/.ssh
                         ssh-keyscan -H target >> ~/.ssh/known_hosts
