@@ -30,6 +30,14 @@ pipeline {
                     mkdir -p ~/.ssh
                     ssh-keyscan target >> ~/.ssh/known_hosts
                     scp -i ${ssh_key} main ${ssh_user}@target:
+                    scp -i ${ssh_key} main.service ${ssh_user}@target:~
+
+
+                    ssh -i ${ssh_key} ${ssh_user}@target << 'EOF'
+                        sudo mv ~/main.service /etc/systemd/system/main.service
+                        sudo systemctl daemon-reload
+                        sudo systemctl enable --now main.service
+                    EOF
 
                     """
                     
