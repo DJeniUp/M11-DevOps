@@ -30,6 +30,7 @@ pipeline {
             steps {
                 sshagent(credentials: ['key-jenkins']) {
                     sh '''
+                         ssh -v -o StrictHostKeyChecking=no laborant@172.16.0.4 'echo OK'
                         ssh -o StrictHostKeyChecking=no laborant@docker '
                             docker pull ttl.sh/myapp:2h &&
                             docker stop myapp || true &&
