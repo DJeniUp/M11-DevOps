@@ -28,13 +28,14 @@ pipeline {
         }
         stage('Deploy to Docker VM') {
             steps {
-                sshagent(credentials: ['jenkins-key']) {
+                sshagent(credentials: ['key-jenkins']) {
                     sh '''
-                    ssh -o StrictHostKeyChecking=no laborant@target << 'EOF'
-                      docker pull ttl.sh/myapp:2h
-                      docker rm -f myapp || true
-                      docker run -d -p 4444:4444 --name myapp ttl.sh/myapp:2h
-                    EOF
+                        ssh -o StrictHostKeyChecking=no laborant@target '
+                            docker pull ttl.sh/myapp:2h &&
+                            docker stop myapp || true &&
+                            docker rm myapp || true &&
+                            docker run -d --name myapp -p 4444:4444 ttl.sh/myapp:2h
+                        '
                     '''
                 }
             }
