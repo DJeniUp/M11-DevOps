@@ -34,13 +34,13 @@ pipeline {
 
         stage('Deploy to Docker VM') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'vm-ssh-creds', usernameVariable: 'SSH_USER', passwordVariable: 'SSH_PASS')]) {
+                withCredentials([sshUserPrivateKey(credentialsId: 'key_jenkins', keyFileVariable: 'SSH_KEY')]) {
                     sh '''
-                        echo "Testing connection to VM..."
-                        sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@${VM_IP} 'echo OK'
+                        echo "Connecting to VM using SSH key..."
+                        ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no laborant@${VM_IP} 'echo OK'
 
-                        echo "Deploying image on remote VM..."
-                        sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@${VM_IP} "
+                        echo "Deploying Docker image..."
+                        ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no laborant@${VM_IP} "
                             docker pull ${IMAGE_NAME} &&
                             docker stop myapp || true &&
                             docker rm myapp || true &&
