@@ -18,29 +18,24 @@ pipeline {
             }
         }
         
-        stage('Deploy') {
+        stage('Docker Build') {
             steps {
-                withCredentials([sshUserPrivateKey(credentialsId: 'key-jenkins',
-                                                   keyFileVariable: 'ssh_key',
-                                                   usernameVariable: 'ssh_user')]) {
-
+                sh '''
+                docker build -t ttl.sh/myapp:2h .
+                docker push ttl.sh/myapp:2h
+                '''
+            }
+        }
+        stage('Deploy to Docker VM') {
+            steps {
+                sshagent(credentials: ['jenkins-key']) {
                     sh '''
-                        chmod +x main
-        
-                        mkdir -p ~/.ssh
-                        ssh-keyscan -H target >> ~/.ssh/known_hosts
-        
-                        scp -i "$ssh_key" main "$ssh_user"@target:
-                        scp -i "$ssh_key" main.service "$ssh_user"@target:~
-        
-                        ssh -i "$ssh_key" "$ssh_user"@target << EOF
-                        sudo mv ~/main.service /etc/systemd/system/main.service
-                        sudo systemctl daemon-reload
-                        sudo systemctl enable --now main.service
-                        EOF
+                    ssh -o StrictHostKeyChecking=no laborant@target << 'EOF'
+                      docker pull ttl.sh/myapp:2h
+                      docker rm -f myapp || true
+                      docker run -d -p 4444:4444 --name myapp ttl.sh/myapp:2h
+                    EOF
                     '''
-
-                    
                 }
             }
         }
