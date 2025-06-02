@@ -58,7 +58,8 @@ pipeline {
                     EOF
 
                     kubectl --kubeconfig=kubeconfig.yaml apply -f definition.yaml
-                    kubectl run
+                    kubectl run myapp --image=ttl.sh/myapp:1h --restart=Never
+                    
                     """
                 }
             }
