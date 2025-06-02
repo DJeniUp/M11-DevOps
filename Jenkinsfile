@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        IMAGE_NAME = 'ttl.sh/myapp:2h'
+        IMAGE_NAME = 'ttl.sh/myapp:1h'
         VM_IP = '172.16.0.4'
     }
 
