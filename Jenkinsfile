@@ -36,7 +36,7 @@ pipeline {
                 withCredentials([string(credentialsId: 'k8s-token', variable: 'KUBE_TOKEN')]) {
                     sh '''
                     export KUBECONFIG=kubeconfig.yaml
-                    kubectl config set-cluster my-cluster --server=https://<K8S-API-SERVER> --insecure-skip-tls-verify=true
+                    kubectl config set-cluster my-cluster --server=https://k8s:6443 --insecure-skip-tls-verify=true
                     kubectl config set-credentials jenkins-user --token=$KUBE_TOKEN
                     kubectl config set-context default --cluster=my-cluster --user=jenkins-user
                     kubectl config use-context default
