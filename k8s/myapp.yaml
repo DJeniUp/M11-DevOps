@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp
+spec:
+  containers:
+  - name: myapp
+    image: ttl.sh/myapp:1h
+    ports:
+    - containerPort: 4444
