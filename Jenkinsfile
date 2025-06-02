@@ -33,7 +33,7 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                kubernetesDeploy(configs: 'k8s/myapp.yaml', kubeconfigId: 'k8s-api-token')
+                kubernetesDeploy(configs: 'k8s/myapp.yaml', kubeconfigId: 'k8s-token')
             }
         }
     }
