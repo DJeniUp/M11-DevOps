@@ -1,12 +1,22 @@
 pipeline {
     agent any
 
+    tools {
+        go "1.24.1"
+    }
+
     environment {
         IMAGE_NAME = 'ttl.sh/myapp:2h'
-        KUBECONFIG = 'kubeconfig.yaml'  // path inside workspace or provide as secret file
+        VM_IP = '172.16.0.4'
     }
 
     stages {
+        stage('Test') {
+            steps {
+                sh "go test ./..."
+            }
+        }
+
         stage('Build') {
             steps {
                 sh 'go build -o main main.go'
