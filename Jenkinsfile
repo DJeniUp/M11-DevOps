@@ -58,6 +58,7 @@ pipeline {
                     EOF
 
                     kubectl --kubeconfig=kubeconfig.yaml apply -f definition.yaml
+                    kubectl run
                     """
                 }
             }
