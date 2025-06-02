@@ -41,6 +41,7 @@ pipeline {
                     kubectl config set-context default --cluster=my-cluster --user=jenkins-user
                     kubectl config use-context default
                     kubectl apply -f definition.yaml
+                    kubectl run my-pod --image=nginx --restart=Never
                     '''
                 }
             }
