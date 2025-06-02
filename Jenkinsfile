@@ -33,7 +33,7 @@ pipeline {
 
         stage('Deploy to Kubernetes') {
             steps {
-                withKubeConfig([credentialsId: 'k8s-api-token']) {
+                withKubeConfig([credentialsId: 'k8s-token']) {
                     sh 'kubectl apply -f k8s/myapp.yaml'
                 }
             }
