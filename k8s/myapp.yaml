@@ -1,10 +1,12 @@
 apiVersion: v1
 kind: Pod
 metadata:
+  labels:
+    run: myapp
   name: myapp
 spec:
   containers:
-  - name: myapp
-    image: ttl.sh/myapp:1h
-    ports:
-    - containerPort: 4444
+  - image: ttl.sh/myapp:1h
+    name: myapp
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
