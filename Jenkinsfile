@@ -35,7 +35,7 @@ pipeline {
             steps {
                 withCredentials(credentialsId: 'k8s-token') {
                     sh '''
-                    kubectl apply -f resource.yaml
+                        kubectl apply -f resource.yaml
                     '''
                 }
             }
