@@ -7,7 +7,6 @@ pipeline {
 
     environment {
         IMAGE_NAME = 'ttl.sh/myapp:2h'
-        VM_IP = '172.16.0.4'
     }
 
     stages {
@@ -32,21 +31,10 @@ pipeline {
             }
         }
 
-        stage('Deploy to Docker VM') {
+        stage('Deploy to Kubernetes') {
             steps {
-                withCredentials([sshUserPrivateKey(credentialsId: 'key_jenkins', keyFileVariable: 'SSH_KEY')]) {
-                    sh '''
-                        echo "Connecting to VM using SSH key..."
-                        ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no laborant@${VM_IP} 'echo OK'
-
-                        echo "Deploying Docker image..."
-                        ssh -i "$SSH_KEY" -o StrictHostKeyChecking=no laborant@${VM_IP} "
-                            docker pull ${IMAGE_NAME} &&
-                            docker stop myapp || true &&
-                            docker rm myapp || true &&
-                            docker run -d --name myapp -p 4444:4444 ${IMAGE_NAME}
-                        "
-                    '''
+                withKubeConfig([credentialsId: 'k8s-api-token']) {
+                    sh 'kubectl apply -f k8s/myapp.yaml'
                 }
             }
         }
