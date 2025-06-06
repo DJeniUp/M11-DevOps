@@ -6,8 +6,10 @@ pipeline {
     }
 
     environment {
-        IMAGE_NAME = 'ttl.sh/myapp:1h'
-        VM_IP = '172.16.0.4'
+        IMAGE_NAME = 'myapp:latest'
+        EC2_USER = 'ec2-user'
+        EC2_IP = '13.60.182.222' 
+        SSH_KEY = 'ec2-ssh-key'  
     }
 
     stages {
@@ -23,29 +25,35 @@ pipeline {
             }
         }
 
-        stage('Docker Build and Push') {
+        stage('Docker Build') {
             steps {
-                sh """
-                    docker build -t ${IMAGE_NAME} .
-                    docker push ${IMAGE_NAME}
-                """
+                sh "docker build -t ${IMAGE_NAME} ."
             }
         }
 
-        stage('Deploy to EC2') {
+        stage('Save Docker Image to tar') {
             steps {
-                sshagent(['ec2-ssh-key']) {
-                    sh """
-                        ssh -o StrictHostKeyChecking=no ubuntu@${VM_IP} '
-                            docker pull ${IMAGE_NAME} &&
-                            docker stop myapp || true &&
-                            docker rm myapp || true &&
-                            docker run -d -p 4444:4444 --name myapp ${IMAGE_NAME}
-                        '
-                    """
-                }
+                sh "docker save ${IMAGE_NAME} -o myapp.tar"
             }
         }
-        
+
+        stage('Copy image to EC2') {
+            steps {
+                sh "scp -o StrictHostKeyChecking=no -i ${SSH_KEY} myapp.tar ${EC2_USER}@${EC2_IP}:/home/${EC2_USER}/"
+            }
+        }
+
+        stage('Load image and run container on EC2') {
+            steps {
+                sh """
+                ssh -o StrictHostKeyChecking=no -i ${SSH_KEY} ${EC2_USER}@${EC2_IP} '
+                    docker load -i /home/${EC2_USER}/myapp.tar &&
+                    docker stop myapp || true &&
+                    docker rm myapp || true &&
+                    docker run -d -p 4444:4444 --name myapp ${IMAGE_NAME}
+                '
+                """
+            }
+        }
     }
 }
