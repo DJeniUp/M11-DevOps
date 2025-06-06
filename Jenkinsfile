@@ -2,9 +2,13 @@ pipeline {
     agent any
 
     tools {
-       go "1.24.1"
+        go "1.24.1"
     }
-    
+
+    environment {
+        IMAGE_NAME = 'ttl.sh/myapp:1h'
+        VM_IP = '172.16.0.4'
+    }
 
     stages {
         stage('Test') {
@@ -12,37 +16,36 @@ pipeline {
                 sh "go test ./..."
             }
         }
+
         stage('Build') {
             steps {
                 sh 'go build -o main main.go'
             }
         }
-        
-        stage('Deploy') {
+
+        stage('Docker Build and Push') {
             steps {
-                withCredentials([sshUserPrivateKey(credentialsId: 'key-jenkins',
-                                                   keyFileVariable: 'ssh_key',
-                                                   usernameVariable: 'ssh_user')]) {
+                sh """
+                    docker build -t ${IMAGE_NAME} .
+                    docker push ${IMAGE_NAME}
+                """
+            }
+        }
 
-                    sh '''
-                        chmod +x main
-        
-                        mkdir -p ~/.ssh
-                        ssh-keyscan -H target >> ~/.ssh/known_hosts
-        
-                        scp -i "$ssh_key" main "$ssh_user"@target:
-                        scp -i "$ssh_key" main.service "$ssh_user"@target:~
-        
-                        ssh -i "$ssh_key" "$ssh_user"@target << EOF
-                        sudo mv ~/main.service /etc/systemd/system/main.service
-                        sudo systemctl daemon-reload
-                        sudo systemctl enable --now main.service
-                        EOF
-                    '''
-
-                    
+        stage('Deploy to EC2') {
+            steps {
+                sshagent(['ec2-ssh-key']) {
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ubuntu@${VM_IP} '
+                            docker pull ${IMAGE_NAME} &&
+                            docker stop myapp || true &&
+                            docker rm myapp || true &&
+                            docker run -d -p 4444:4444 --name myapp ${IMAGE_NAME}
+                        '
+                    """
                 }
             }
         }
+        
     }
 }
