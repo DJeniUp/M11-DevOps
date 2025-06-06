@@ -32,37 +32,20 @@ pipeline {
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        stage('Deploy to EC2') {
             steps {
-                // Inject token from Jenkins credentials, write kubeconfig.yaml
-                withCredentials([string(credentialsId: 'k8s-token', variable: 'KUBE_TOKEN')]) {
+                sshagent(['ec2-ssh-key']) {
                     sh """
-                    cat > kubeconfig.yaml <<EOF
-                    apiVersion: v1
-                    kind: Config
-                    clusters:
-                    - cluster:
-                        insecure-skip-tls-verify: true
-                        server: https://k8s:6443
-                      name: my-cluster
-                    contexts:
-                    - context:
-                        cluster: my-cluster
-                        user: jenkins-robot
-                      name: default
-                    current-context: default
-                    users:
-                    - name: jenkins-robot
-                      user:
-                        token: ${KUBE_TOKEN}
-                    EOF
-
-                    kubectl --kubeconfig=kubeconfig.yaml apply -f definition.yaml
-                    kubectl run myapp --image=ttl.sh/myapp:1h --restart=Never
-                    
+                        ssh -o StrictHostKeyChecking=no ubuntu@${VM_IP} '
+                            docker pull ${IMAGE_NAME} &&
+                            docker stop myapp || true &&
+                            docker rm myapp || true &&
+                            docker run -d -p 4444:4444 --name myapp ${IMAGE_NAME}
+                        '
                     """
                 }
             }
         }
+        
     }
 }
